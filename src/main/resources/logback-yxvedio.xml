@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="log.pattern" value="%date %-5level %logger{0} - %message%n" />
+  <property name="log.history" value="7" />
+  <property name="log.folder" value="D:/Tridion/logs/httpupload" />
+  <property name="log.level" value="DEBUG" />
+
+  <contextName>yxvedio</contextName>
+
+  <jmxConfigurator contextName="yxvedio" />
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+    <encoder>
+      <pattern>[%p] [%thread] %logger - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <File>log/yxvedio.log</File>
+    <Append>false</Append>
+    <Encoding>UTF-8</Encoding>
+    <BufferedIO>false</BufferedIO>
+    <ImmediateFlush>true</ImmediateFlush>
+    <encoder>
+      <pattern>%date [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE-ROLL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>log/yxvedio.log</File>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>log/yxvedio.%d{yyyy-MM-dd}.log</FileNamePattern>
+      <MaxHistory>3</MaxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+    <prudent>false</prudent>
+  </appender>
+
+  <appender name="FILE-SIZE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>log/yxvedio.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>log/yxvedio.%i.log</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>5</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>10MB</maxFileSize>
+    </triggeringPolicy>
+    <encoder>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+    <prudent>false</prudent>
+  </appender>
+
+  <root>
+    <level value="DEBUG" />
+    <appender-ref ref="FILE-SIZE" />
+    <appender-ref ref="CONSOLE" />
+  </root>
+  <logger name="com.yixiang.wlyx.application">
+    <level value="DEBUG" />
+  </logger>
+  <logger name="com.yixiang.wlyx">
+    <level value="DEBUG" />
+  </logger>
+</configuration>
