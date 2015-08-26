@@ -43,8 +43,12 @@ import com.yixiang.wlyx.service.redisService;
 public class YxChat extends ApplicationAdapter {
 
   @SuppressWarnings("hiding")
+  private final static int CHAT_NUMBER = 2;
+  private final static int REST_NUMBER = 1;
+
   private static Logger log;
   public IScope globalScope = null;
+
   private static HashMap<String, IConnection> clients = new HashMap<String, IConnection>();
   private static HashMap<String, YxUser> onlines = new HashMap<String, YxUser>();
   private static HashMap<String, YxUser> users = new HashMap<String, YxUser>();
@@ -63,14 +67,7 @@ public class YxChat extends ApplicationAdapter {
     Red5LoggerFactory.setUseLogback(true);
     log = Red5LoggerFactory.getLogger(YxChat.class, "yxvedio");
     this.globalScope = scope;
-    /*
-     * TestBean testBean = (TestBean) getBean("testbean"); testBean.sayHell();
-     * 
-     * HelloService helloService = (HelloService) getBean("helloService");
-     * 
-     * helloService.useCallback();
-     */
-    log.info("********************myapp started!***********************************");
+    log.info("********************Yxvedio started!***********************************");
     return true;
   }
 
@@ -87,13 +84,13 @@ public class YxChat extends ApplicationAdapter {
       rejectClient("ROOM IS NOT EXIST");
     }
 
-    if (scope.getPath().startsWith("/default/yxvedio/room") && params.length < 3) {
-      rejectClient("PARMAS NUMBER MUST BE 2");
-    }
+    // if (scope.getPath().startsWith("/default/yxvedio/room") && params.length < 3) {
+    // rejectClient("PARMAS NUMBER MUST BE 2");
+    // }
 
     String roomName = params[0].toString();
     String session_id = params[1].toString();
-    String act = params[2].toString();
+    // String act = params[2].toString();
 
     String scopeRoomName = scope.getName();
 
@@ -101,17 +98,19 @@ public class YxChat extends ApplicationAdapter {
       rejectClient(String.format("The room %1s is not this room %2s", roomName, scopeRoomName));
     }
 
-    if ("new room".equals(act) && rooms.containsKey(roomName)) {
-      rejectClient("ROOM HADE BEEN THERE");
-    }
+    // if ("new room".equals(act) && rooms.containsKey(roomName)) {
+    // rejectClient("ROOM HADE BEEN THERE");
+    // }
 
     String path = scope.getPath();
     if (path.startsWith("/default/yxvedio/room")) {
-      inChatRoom(scopeRoomName, act);
+      // inChatRoom(scopeRoomName);
+      inRoom(scopeRoomName, true);
       con.setAttribute("in.room", "chat");
       con.setAttribute("room.name", roomName);
     } else if (path.startsWith("/default/yxvedio/doctor")) {
-      inDoctorRoom(scopeRoomName, act);
+      // inRestRoom(scopeRoomName);
+      inRoom(scopeRoomName, false);
       con.setAttribute("in.room", "doctor");
     }
 
@@ -153,21 +152,17 @@ public class YxChat extends ApplicationAdapter {
     return super.appConnect(con, params);
   }
 
-  private void inChatRoom(String roomName, String act) {
-    if ("join room".equals(act)) {
-      if (!rooms.containsKey(roomName))
-        rejectClient(roomName + " ROOM IS NOT EXIST");
-      else if (rooms.get(roomName) >= 2)
-        rejectClient(roomName + "ROOM IS FULL");
-    }
-    inRoom(roomName);
-  }
-
-  private void inDoctorRoom(String roomName, String act) {
-    if ("join room".equals(act)) {
-      rejectClient("YOU ARE IN DOCTOR ROOM ");
-    }
-  }
+  // private void inChatRoom(String roomName) {
+  // if (rooms.get(roomName) >= 2)
+  // rejectClient(roomName + "ROOM IS FULL");
+  //
+  // inRoom(roomName);
+  // }
+  //
+  // private void inRestRoom(String roomName) {
+  // if (rooms.get(roomName) >= 1)
+  // rejectClient(roomName + "ROOM IS FULL");
+  // }
 
   /**
    * 当客户端断开连接的时候调用！ 这里我们覆盖了父类的实现。
@@ -229,10 +224,6 @@ public class YxChat extends ApplicationAdapter {
         }
       }
     }
-  }
-
-  private void changeDoctorRoom() {
-
   }
 
   /**
@@ -626,12 +617,15 @@ public class YxChat extends ApplicationAdapter {
     }
   }
 
-  private void inRoom(String roomName) {
+  private void inRoom(String roomName, Boolean isChat) {
+    int allowPersons = isChat ? CHAT_NUMBER : REST_NUMBER;
+
     if (rooms.containsKey(roomName)) {
       int nums = rooms.get(roomName) + 1;
-      rooms.put(roomName, nums);
-      if (nums > 2) {
+      if (nums > allowPersons) {
         rejectClient();
+      } else {
+        rooms.put(roomName, nums);
       }
     } else {
       rooms.put(roomName, 1);
